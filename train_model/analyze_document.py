@@ -1,15 +1,20 @@
-import os
 import re
 import joblib
 from sentence_transformers import SentenceTransformer
 from dotenv import load_dotenv
 import fitz  # PyMuPDF
-from groq import Groq
+import os
+from groq import Groq  # Make sure this is imported
 
 # Load environment variables from .env file
-load_dotenv(dotenv_path=os.path.join(os.getcwd(), ".env"))
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env"))
 
-groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
+# Initialize Groq client using the API key from .env
+api_key = os.getenv("GROQ_API_KEY")
+if api_key is None:
+    raise ValueError("❌ GROQ_API_KEY not found. Make sure it's correctly set in the .env file.")
+groq_client = Groq(api_key=api_key)
+
 
 def extract_text_from_pdf(pdf_path):
     """
@@ -24,12 +29,14 @@ def extract_text_from_pdf(pdf_path):
         print(f"💥 Error reading PDF file: {e}")
         return ""
 
+
 def split_into_clauses(text):
     """
     Splits extracted text into clauses based on basic rules.
     """
     clauses = re.split(r'\n\s*\d+\.|\n\n|\.\s', text)
     return [cl.strip() for cl in clauses if len(cl.strip()) > 20]
+
 
 def load_models(model_folder="saved_model"):
     """
@@ -42,6 +49,7 @@ def load_models(model_folder="saved_model"):
     except Exception as e:
         print(f"💥 Error loading models from '{model_folder}': {e}")
         return None, None
+
 
 def explain_clause(clause):
     """
@@ -71,6 +79,7 @@ def explain_clause(clause):
         return response.choices[0].message.content.strip()
     except Exception as e:
         return f"💥 Error: {str(e)}"
+
 
 def analyze_document(file_path, model_folder="saved_model"):
     """
@@ -104,6 +113,7 @@ def analyze_document(file_path, model_folder="saved_model"):
         print(f"\n--- {status} ---\n{clause}")
         if explanation:
             print(f"Explanation: {explanation}")
+
 
 if __name__ == "__main__":
     # Use relative path for the sample file
