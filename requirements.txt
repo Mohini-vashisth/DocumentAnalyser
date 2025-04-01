@@ -1,0 +1,10 @@
+python-dotenv
+torch
+transformers
+scikit-learn
+matplotlib
+seaborn
+pandas
+numpy
+sentence-transformers
+fitz

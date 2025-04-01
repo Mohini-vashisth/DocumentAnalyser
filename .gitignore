@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.env
+*.sqlite3
+.DS_Store
+
+# Jupyter
+.ipynb_checkpoints
+
+# Model files
+/saved_model_cuad_model/
+/saved_model_ledgar_model/
+
+/data/*.csv
+
+# VSCode
+.vscode/
+
+#CUAD
+cuad/
