@@ -36,7 +36,7 @@ if __name__ == "__main__":
     X, y = load_data("data/legal_clauses_labeled.csv")  # or ledgar_clauses.csv or combined
 
     # Evaluate CUAD model
-    evaluate_model("CUAD", "saved_model_cuad_model", X, y)
+    evaluate_model("CUAD", "saved_model", X, y)
 
     # Evaluate LEDGAR model
     evaluate_model("LEDGAR", "saved_model_ledgar_model", X, y)
