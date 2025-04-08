@@ -1,10 +1,11 @@
 import re
 import joblib
-from sentence_transformers import SentenceTransformer
+from transformers import RobertaModel, RobertaTokenizer
+import torch
 from dotenv import load_dotenv
 import fitz  # PyMuPDF
 import os
-from groq import Groq  # Make sure this is imported
+from groq import Groq
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "../.env"))
@@ -40,15 +41,27 @@ def split_into_clauses(text):
 
 def load_models(model_folder="saved_model"):
     """
-    Loads the SentenceTransformer model and the Logistic Regression classifier.
+    Loads the RoBERTa model and the Logistic Regression classifier.
     """
     try:
-        encoder = SentenceTransformer(os.path.join(model_folder, "sentence_encoder"))
+        tokenizer = RobertaTokenizer.from_pretrained("roberta-base")
+        model = RobertaModel.from_pretrained("roberta-base")
         clf = joblib.load(os.path.join(model_folder, "clause_classifier.pkl"))
-        return encoder, clf
+        return model, tokenizer, clf
     except Exception as e:
         print(f"💥 Error loading models from '{model_folder}': {e}")
-        return None, None
+        return None, None, None
+
+
+def encode_clauses(model, tokenizer, clauses):
+    """
+    Encodes clauses using RoBERTa model.
+    """
+    inputs = tokenizer(clauses, padding=True, truncation=True, return_tensors="pt")
+    with torch.no_grad():
+        outputs = model(**inputs)
+    embeddings = outputs.last_hidden_state.mean(dim=1)
+    return embeddings.numpy()
 
 
 def explain_clause(clause):
@@ -97,14 +110,14 @@ def analyze_document(file_path, model_folder="saved_model"):
             return
 
     clauses = split_into_clauses(text)
-    encoder, clf = load_models(model_folder)
+    model, tokenizer, clf = load_models(model_folder)
 
-    if encoder is None or clf is None:
+    if model is None or clf is None:
         print("❌ Failed to load models. Please check your model folder path.")
         return
 
     print(f"\nFound {len(clauses)} clauses. Analyzing...\n")
-    clause_vectors = encoder.encode(clauses)
+    clause_vectors = encode_clauses(model, tokenizer, clauses)
     predictions = clf.predict(clause_vectors)
 
     for clause, label in zip(clauses, predictions):
@@ -121,4 +134,4 @@ if __name__ == "__main__":
     if not os.path.exists(test_file):
         print(f"❌ File '{test_file}' not found. Add a contract text file first.")
     else:
-        analyze_document(test_file, model_folder="saved_model")
+        analyze_document(test_file, model_folder="saved_model_roberta")
