@@ -1,4 +1,3 @@
-
 # 🔍 Legal Document Analyzer
 
 ![Python](https://img.shields.io/badge/Python-3.9%2B-blue)
@@ -21,12 +20,12 @@ The **Legal Document Analyzer** helps lawyers, paralegals, and non-lawyers quick
 LegalDocumentAnalyzer/
 ├── train_model/
 │   ├── analyze_document.py          # Script to analyze documents and explain risky clauses
-│   ├── load_lexglue_ledgar.py       # Script to load LEDGAR dataset
-│   ├── train_and_evaluate.py        # Script to train models
-│   ├── compare_models.py            # Script to compare CUAD vs. LEDGAR models
+│   ├── dataset_loader.py            # Script to load CUAD dataset
+│   ├── train_classifier.py           # Script to train Sentence-BERT models
+│   ├── train_roberta_classifier.py   # Script to train RoBERTa models
+│   ├── compare_models.py            # Script to compare CUAD models
 ├── data/
 │   ├── legal_clauses_labeled.csv    # Processed CUAD dataset
-│   ├── ledgar_clauses.csv           # Processed LEDGAR dataset
 ├── saved_model/                     # Folder containing trained models
 ├── .env                             # Environment file for storing sensitive keys
 ├── README.md                        # Project documentation
@@ -60,22 +59,29 @@ GROQ_API_KEY=your_groq_api_key
 
 ### 4. Prepare Datasets
 
-Ensure your processed datasets (`legal_clauses_labeled.csv`, `ledgar_clauses.csv`) are in the `data/` folder.
+Ensure your processed datasets (`legal_clauses_labeled.csv`) are in the `data/` folder.
 
 ---
 
 ## 📖 Usage Guide
 
 ### 🔨 Training Models
+
+#### Sentence-BERT
 ```bash
-python train_model/train_and_evaluate.py data/legal_clauses_labeled.csv cuad_model
-python train_model/train_and_evaluate.py data/ledgar_clauses.csv ledgar_model
+python train_model/train_classifier.py
+```
+
+#### RoBERTa
+```bash
+python train_model/train_roberta_classifier.py
 ```
 
 ### 📈 Comparing Models
 ```bash
 python train_model/compare_models.py
 ```
+This script evaluates both models on the CUAD dataset and visualizes metrics like precision, recall, and F1-score.
 
 ### 📄 Analyzing a Contract (PDF or Text File)
 ```bash
